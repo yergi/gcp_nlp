@@ -147,3 +147,39 @@ def get_operation_status(
     print(f'Current status: {status}')
 
     return status
+
+
+def get_model(
+        project_id: str,
+        model_id,
+        region: str = 'us-central1'
+) -> object:
+    """
+    Retrieve model from GCP
+    :param project_id: GCP project ID
+    :param model_id: GCP model ID
+    :param region: GCP region where operations will be run
+    :return: Model object from GCP
+    """
+
+    # Get model details
+    model_path = client.model_path(project_id, region, model_id)
+    model = client.get_model(model_path)
+
+    # Retrieve deployment state
+    deployment_state = ''
+    if model.deployment_state == enums.Model.DeploymentState.DEPLOYED:
+        deployment_state = 'deployed'
+    else:
+        deployment_state = 'undeployed'
+
+    # Print model details
+    print(f'Model name: {model.name}')
+    print(f'Model ID: {model.name.split("/")[-1]}')
+    print(f'Model display name: {model.display_name}')
+    print('Model create time:')
+    print(f'\tseconds: {model.create_time.seconds}')
+    print(f'\tnanos: {model.create_time.nanos}')
+    print(f'Deployment state: {deployment_state}')
+
+    return model
