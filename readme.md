@@ -10,3 +10,5 @@ and storing a completed model's predictions to an outside data source.
 **Note:** Set up of a GCP account and proper storage of credentials as described
 in [this help document](https://cloud.google.com/natural-language/automl/docs/before-you-begin) 
 is required for this package to work.
+
+*TODO:* Add tests
