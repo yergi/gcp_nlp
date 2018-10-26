@@ -55,3 +55,52 @@ def create_dataset(
     print(f'\tnanos: {new_dataset.create_time.nanos}')
 
     return new_dataset
+
+
+def import_data(
+        project_id: str,
+        dataset_id: str,
+        path: str,
+        region: str = 'us-central1'
+) -> str:
+    """
+    Import labelled items.
+    :param project_id: project_id from GCP
+    :param dataset_id: Dataset id from GCP
+    :param path: path to CSV file containing labelled items
+    :param region: GCP region where function will be performed
+    :return: String of result status
+    """
+
+    dataset_loc = client.dataset_path(
+        project_id, region, dataset_id
+    )
+
+    # TODO: Update to handle path as str or list
+    input_uris = path.split(',')
+    input_config = {'gcs_source': {
+        'input_uris': input_uris
+    }}
+
+    response = client.import_data(dataset_loc, input_config)
+
+    print('Processing...')
+    print(f'Process Complete. {response.result()}')
+
+    return response.result()
+
+
+def upload_data(
+        project_name: str,
+        lpath: str,
+        rpath: str
+) -> None:
+    """
+    Wrapper around GCSFS to upload CSV file into Google Cloud Storage
+    :param project_name: Name of project in GCP
+    :param lpath: local filepath
+    :param rpath: remote filepath
+    :return: None
+    """
+    fs = gcsfs.GCSFileSystem(project=project_name)
+    fs.put(lpath, rpath)
