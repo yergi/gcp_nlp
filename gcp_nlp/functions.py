@@ -183,3 +183,95 @@ def get_model(
     print(f'Deployment state: {deployment_state}')
 
     return model
+
+
+def list_model_evaluations(
+        project_id: str,
+        model_id: str,
+        filter_: str,
+        region: str = 'us-central1'
+) -> object:
+    """
+    List model evaluations to determine quality
+    :param project_id: GCP project ID
+    :param model_id: GCP model ID
+    :param filter_: Filter expression to limit evals returned
+    :param region: GCP compute region
+    :return: object of evaluations
+    """
+
+    model_path = client.model_path(project_id, region, model_id)
+
+    # List all of the model evals, apply filter if it exists to limit results
+    evaluations = client.list_model_evaluations(model_path, filter_)
+
+    print('List of model evaluations:')
+    for evaluation in evaluations:
+        print(evaluation)
+
+    return evaluations
+
+
+def get_model_evaluation(
+        project_id: str,
+        model_id: str,
+        model_evaluation_id: str,
+        region: str = 'us-central1'
+) -> object:
+    """
+    Get specific model evaluation
+    :param project_id: GCP project ID
+    :param model_id: GCP model ID
+    :param model_evaluation_id: GCP model evaluation ID
+    :param region: GCP compute region
+    :return: object with evaluation results
+    """
+
+    model_evaluation_path = client.model_evaluation_path(
+        project_id, region, model_id, model_evaluation_id
+    )
+
+    evaluation = client.get_model_evaluation(model_evaluation_path)
+
+    print(evaluation)
+
+    return evaluation
+
+
+def predict(
+        project_id: str,
+        model_id: str,
+        target_data: str,
+        mime_type: str = 'text/plain',
+        region: str = 'us-central1',
+        params: dict = {}
+) -> object:
+    """
+    Return prediction output of model on single text value
+    :param project_id: GCP project ID
+    :param model_id: GCP model ID
+    :param target_data: string to input into model for prediction
+    :param mime_type: MIME type of string, if not plain text
+    :param region: GCP compute region
+    :param params: Empty dict
+    :return: Object of prediction result
+    """
+
+    prediction_client = automl.PredictionServiceClient()
+
+    model_path = client.model_path(
+        project_id, region, model_id
+    )
+
+    payload = {
+        'text_snippet': {
+            'content': target_data,
+            'mime_type': mime_type
+        }
+    }
+
+    prediction_result = prediction_client.predict(
+        model_path, payload, params
+    )
+
+    return prediction_result
