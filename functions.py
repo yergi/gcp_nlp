@@ -104,3 +104,51 @@ def upload_data(
     """
     fs = gcsfs.GCSFileSystem(project=project_name)
     fs.put(lpath, rpath)
+
+
+def create_model(
+        project_id: str,
+        dataset_id: str,
+        model_name: str,
+        region: str = 'us-central1'
+) -> str:
+    """
+    Create NLP model and begin training
+    :param project_id: Project ID in GCP
+    :param dataset_id: Dataset ID in GCP
+    :param model_name: Name for model
+    :param region: Region where GCP will run model
+    :return: string of operation name
+    """
+
+    project_loc = client.location_path(project_id, region)
+
+    model_config = {
+        'display_name': model_name,
+        'dataset_id': dataset_id,
+        'text_classification_model_metadata': {},
+    }
+
+    response = client.create_model(project_loc, model_config)
+    print(f'Training operation name: {response.operation.name}')
+    print('Training started...')
+
+    return response.operation.name
+
+
+def get_operation_status(
+        operation_id: str
+) -> object:
+    """
+    Return status of given model operation
+    :param operation_id: ID of operation, which is the output of the *_model functions
+    :return: Operation object with status details
+    """
+
+    status = client.transport._operations_client.get_operation(
+        operation_id
+    )
+
+    print(f'Current status: {status}')
+
+    return status
