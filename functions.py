@@ -1,19 +1,9 @@
 from google.cloud import automl_v1beta1 as automl
-from enum import Enum
+from google.cloud.automl_v1beta1 import enums
 import gcsfs
 
 # Set up GCP service
 client = automl.AutoMlClient()
-
-
-# Create Enum for classification type to prevent bad input
-class ClassificationType(Enum):
-    multiclass = 'MULTICLASS'
-    multilabel = 'MULTILABEL'
-
-    @classmethod
-    def has_name(cls, name):
-        return any(name == item.name for item in cls)
 
 
 def create_dataset(
@@ -31,7 +21,12 @@ def create_dataset(
     :return:
     """
     # Test classification_type is valid
-    if not ClassificationType.has_name(classification_type):
+    if any(
+            classification_type.upper() == valid_type.name
+            for valid_type in enums.ClassificationType
+    ):
+         classification_type = classification_type.upper()
+    else:
         raise ValueError(
             'classification_type must be "MULTICLASS" or "MULTILABEL"'
         )
